@@ -6,9 +6,6 @@ package edu.berkeley.eecs.cs164.pa1;
  */
 public class RegexParser {
 
-    private RegexParser() {
-    }
-
     /**
      * This is the main function of this object. It kicks off
      * whatever "compilation" process you write for converting
