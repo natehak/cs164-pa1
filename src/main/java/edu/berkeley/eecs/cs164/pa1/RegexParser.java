@@ -5,6 +5,27 @@ package edu.berkeley.eecs.cs164.pa1;
  */
 public class RegexParser {
 
+    private char[] pattern;
+    private char token;
+    private int index;
+
+    public RegexParser(String pattern) {
+        this.pattern = pattern.toCharArray();
+        index = 0;
+        advance();
+    }
+
+    /**
+     * Advances token by character.
+     */
+    private void advance() {
+        if (index >= pattern.length) {
+            token = '\0';
+        } else {
+            token = pattern[index++];
+        }
+    }
+
     /**
      * This is the main function of this object. It kicks off
      * whatever "compilation" process you write for converting
@@ -15,8 +36,78 @@ public class RegexParser {
      * @throws RegexParseException upon encountering a parse error
      */
     public static Automaton parse(String pattern) {
-        // Why no tokenize step? Because each character is itself a token! (Disregarding escapes)
-        return null;
+        RegexParser parser = new RegexParser(pattern);
+        return parser.expr();
+    }
+
+    private Automaton expr() {
+        Automaton auto;
+
+        auto = term();
+        while (token == '|') {
+            advance();
+            auto = alt(auto, term());
+        }
+
+        return auto;
+    }
+
+    private Automaton term() {
+        Automaton auto = empty();
+
+        while (token != '\0') {
+            auto = concat(auto, factor());
+        }
+
+        return auto;
+    }
+
+    private Automaton factor() {
+        Automaton auto;
+        auto = atom();
+        if (token == '+') {
+            advance();
+            auto = plus(auto);
+        } else if (token == '*') {
+            advance();
+            auto = star(auto);
+        } else if (token == '?') {
+            advance();
+            auto = option(auto);
+        }
+        return auto;
+    }
+
+    private Automaton atom() {
+        Automaton auto;
+        if (token == '\\') {
+            advance();
+            auto = recognize(token);
+            advance();
+        } else if (token == '(') {
+            advance();
+            auto = expr();
+            if (token != ')') {
+                throw new RegexParseException("Parenthesis mismatched.");
+            }
+            advance();
+        } else {
+            auto = recognize(token);
+            advance();
+        }
+
+        return auto;
+    }
+
+    /**
+     * Creates an NFA that recognizes an empty factor.
+     * @return An automaton that always suceeds.
+     */
+    private Automaton empty() {
+        AutomatonState in = new AutomatonState();
+        AutomatonState out = new AutomatonState();
+        in.addEpsilonTransition(out);
+        return new Automaton(in, out);
     }
 
     /**
