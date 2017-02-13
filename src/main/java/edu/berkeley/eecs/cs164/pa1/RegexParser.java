@@ -55,7 +55,7 @@ public class RegexParser {
     private Automaton term() {
         Automaton auto = empty();
 
-        while (token != '\0') {
+        while (token != '\0' && token != ')') {
             auto = concat(auto, factor());
         }
 
@@ -94,7 +94,7 @@ public class RegexParser {
             advance();
             auto = expr();
             if (token != ')') {
-                throw new RegexParseException("Parenthesis mismatched.");
+                throw new RegexParseException("Parenthesis mismatched. Input: " + new String(pattern));
             }
             advance();
         } else {
