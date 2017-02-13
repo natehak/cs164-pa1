@@ -55,7 +55,7 @@ public class RegexParser {
     private Automaton term() {
         Automaton auto = empty();
 
-        while (token != '\0' && token != ')') {
+        while (token != '\0' && token != ')' && token != '|') {
             auto = concat(auto, factor());
         }
 
