@@ -8,31 +8,6 @@ import java.util.*;
 public class NFASimulator {
     private final Automaton nfa;
 
-    class State {
-
-        public AutomatonState state;
-        public int depth;
-        public int index;
-
-        public State(AutomatonState state, int depth, int index) {
-            this.state = state;
-            this.depth = depth;
-            this.index = index;
-        }
-    }
-
-    class StateComparator implements Comparator<State> {
-
-        @Override
-        public int compare(State a, State b) {
-            if (a.index == b.index) {
-                return a.depth - b.depth;
-            } else {
-                return a.index - b.index;
-            }
-        }
-    }
-
     /**
      * Create a new simulator from a given NFA structure
      *
