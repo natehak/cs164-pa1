@@ -82,7 +82,13 @@ public class RegexParser {
         Automaton auto;
         if (token == '\\') {
             advance();
-            auto = recognize(token);
+            if (token == 'n') {
+                auto = recognize('\n');
+            } else if (token == 't') {
+                auto = recognize('\t');
+            } else {
+                auto = recognize(token);
+            }
             advance();
         } else if (token == '(') {
             advance();
