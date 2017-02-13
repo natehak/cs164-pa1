@@ -49,29 +49,43 @@ public class NFASimulator {
      * @return true if the text is accepted by the NFA, else false
      */
     public boolean matches(String text) {
-        PriorityQueue<State> fringe = new PriorityQueue<State>(100, new StateComparator());
-        fringe.add(new State(nfa.getStart(), 0, 0));
+        Set<AutomatonState> in = new HashSet<AutomatonState>();
+        in.add(nfa.getStart());
+        Set<AutomatonState> d = closure(in);
 
-        while (!fringe.isEmpty()) {
-            State state = fringe.poll();
-
-            if (state.state.equals(nfa.getOut()) && state.index == text.length()) {
-                return true;
-            }
-
-            Set<AutomatonState> epsilonStates = state.state.getEpsilonTransitions();
-            for (AutomatonState s : epsilonStates) {
-                fringe.add(new State(s, state.depth + 1, state.index));
-            }
-
-            if (state.index < text.length()) {
-                Set<AutomatonState> states = state.state.getTransitions(text.charAt(state.index));
-                for (AutomatonState s : states) {
-                    fringe.add(new State(s, state.depth + 1, state.index + 1));
-                }
-            }
+        for (char ch : text.toCharArray()) {
+            d = dfaEdge(d, ch);
         }
-        return false;
+
+        return d.contains(nfa.getOut());
+    }
+
+    /**
+     * Find all states reachable from the input by epsilon moves.
+     * @param states the set of states to start from
+     * @return set of all states reachable from state by epsilon moves
+     */
+    private Set<AutomatonState> closure(Set<AutomatonState> states) {
+        Set<AutomatonState> t = new HashSet<AutomatonState>();
+        t.addAll(states);
+        for (AutomatonState s : t) {
+            t.addAll(closure(s.getEpsilonTransitions()));
+        }
+        return t;
+    }
+
+    /**
+     * Find all states NFA could be in after taking all possible epsilon moves and a character move.
+     * @param d current states
+     * @param c character to transition with
+     * @return all states possible by taking transition with label c and epsilons
+     */
+    private Set<AutomatonState> dfaEdge(Set<AutomatonState> d, char c) {
+        Set<AutomatonState> input = new HashSet<AutomatonState>();
+        for (AutomatonState s : d) {
+            input.addAll(s.getTransitions(c));
+        }
+        return closure(input);
     }
 
 }
