@@ -25,7 +25,11 @@ public class NFASimulator {
 
         @Override
         public int compare(State a, State b) {
-            return a.depth - b.depth;
+            if (a.index == b.index) {
+                return a.depth - b.depth;
+            } else {
+                return a.index - b.index;
+            }
         }
     }
 
@@ -49,27 +53,22 @@ public class NFASimulator {
         fringe.add(new State(nfa.getStart(), 0, 0));
 
         while (!fringe.isEmpty()) {
-            /*
-            if (fringe.contains(nfa.getOut())) {
+            State state = fringe.poll();
+
+            if (state.state.equals(nfa.getOut()) && state.index == text.length()) {
                 return true;
             }
-            */
-            State state = fringe.poll();
 
             Set<AutomatonState> epsilonStates = state.state.getEpsilonTransitions();
             for (AutomatonState s : epsilonStates) {
-                if (s.equals(nfa.getOut())) {
-                    return true;
-                }
                 fringe.add(new State(s, state.depth + 1, state.index));
             }
 
-            Set<AutomatonState> states = state.state.getTransitions(text.charAt(state.index));
-            for (AutomatonState s : states) {
-                if (s.equals(nfa.getOut())) {
-                    return true;
+            if (state.index < text.length()) {
+                Set<AutomatonState> states = state.state.getTransitions(text.charAt(state.index));
+                for (AutomatonState s : states) {
+                    fringe.add(new State(s, state.depth + 1, state.index + 1));
                 }
-                fringe.add(new State(s, state.depth + 1, state.index + 1));
             }
         }
         return false;
