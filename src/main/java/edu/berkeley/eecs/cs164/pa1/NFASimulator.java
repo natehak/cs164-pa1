@@ -61,16 +61,27 @@ public class NFASimulator {
     }
 
     /**
-     * Find all states reachable from the input by epsilon moves.
+     * Find all states reachable from the input by epsilon moves. Basically a DFS.
      * @param states the set of states to start from
      * @return set of all states reachable from state by epsilon moves
      */
     private Set<AutomatonState> closure(Set<AutomatonState> states) {
+        Deque<AutomatonState> t_prime = new ArrayDeque<AutomatonState>();
         Set<AutomatonState> t = new HashSet<AutomatonState>();
-        t.addAll(states);
-        for (AutomatonState s : t) {
-            t.addAll(closure(s.getEpsilonTransitions()));
+
+        for (AutomatonState s : states) {
+            t_prime.addFirst(s);
         }
+
+        while (!t_prime.isEmpty()) {
+            AutomatonState s = t_prime.removeFirst();
+            t.add(s);
+
+            for (AutomatonState ep : s.getEpsilonTransitions()) {
+                t_prime.addFirst(ep);
+            }
+        }
+
         return t;
     }
 
